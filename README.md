@@ -5,4 +5,4 @@ A simple PHP page scraper for Royal Mail Track and Trace because Royal Mail don'
 
 Using cURL and DOM.
 
-Feel free to use how you wish.
+Feel free to use however you wish.
