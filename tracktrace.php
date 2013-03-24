@@ -29,18 +29,14 @@ echo str_replace('\\/', '/', json_encode($output));
 function CurlPost($url, $postData){
 	//start cURL
 	$ch = curl_init();
-
 	//set the url, number of POST vars, POST data
 	curl_setopt($ch,CURLOPT_URL, $url);
 	curl_setopt ($ch, CURLOPT_POST, true);
 	curl_setopt ($ch, CURLOPT_POSTFIELDS, $postData);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	
 	$html = curl_exec($ch);
-
 	//close cURL
 	curl_close($ch);
-
 	return $html;
 }
 
@@ -88,10 +84,10 @@ function TrackTraceQuery($trackingNumber){
 						$status = $value->nodeValue;
 						if(preg_match('/delivered/i', $status)){$delivered = 1; $deliveredID = $i;}
 						if(preg_match('/signature/i', $status)){$signature = 1; $signatureID = $i;}
-					break;
+						break;
 					case 3:
 						$trackPoint = $value->nodeValue;
-					break;
+						break;
 				}
 				$i2++;
 			}
@@ -115,7 +111,6 @@ function TrackTraceQuery($trackingNumber){
 				$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => str_replace(" ", '', $signby->item(0)->nodeValue)) + $output;
 			}
 		}
-
 		$output = array('trackingNumber' => $trackingNumber, 'response' => 1, 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
 	}
 	return $output;
