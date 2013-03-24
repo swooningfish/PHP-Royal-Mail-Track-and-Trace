@@ -2,15 +2,29 @@
 //Royal Mail Track and Trace page scraper
 //Rory Oldershaw 2013
 //https://github.com/roryoldershaw
+//This program is free software: you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+
+//You should have received a copy of the GNU General Public License
+//along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //Set some variables
 $delivered = 0;
 $signature = 0;
 $deliveredID; //The arrayID of the record mentioning that the parcel has been delivered.
 $signatureID; //The arrayID of the record mentioning a signature has been taken.
-$arr = array(); //Array for storing the results
+$trackRecords = array(); //Array for storing the track records
+$output = array(); //Array for the final output 
 
-$trackingNumber = "FI107380836GB";
+//For a demo you can use FI107380836GB
+$trackingNumber = $_GET['tn'];
 
 function CurlPost($url, $postData){
 	//start cURL
@@ -47,7 +61,7 @@ $rows = $x->query('//*[@id="bt-tracked-track-trace-form"]/div/div/div/div[1]/tab
 if($rows->length == 0){
 	//No data returned
 	$error = $x->query('//*[@id="bt-tracked-track-trace-form"]/div/div/div/div[1]/div[5]/text()');
-	$arr = array('trackingNumber' => $trackingNumber, 'response' => '0', 'errorMsg' => $error->item(0)->nodeValue);
+	$output = array('trackingNumber' => $trackingNumber, 'response' => '0', 'errorMsg' => $error->item(0)->nodeValue);
 }else{
 	//Loops to build arrays with records.
 	$i = 0;
@@ -73,8 +87,8 @@ if($rows->length == 0){
 			}
 			$i2++;
     	}
-		array_push($arr, array("date" => $date, "time" => $time, "status" => $status, "trackPoint" => $trackPoint));
-		$i++;	
+		array_push($trackRecords, array("id" => $i ,"date" => $date, "time" => $time, "status" => $status, "trackPoint" => $trackPoint));
+		$i++;
 	}
 
 	//Adding some extras to the output
@@ -122,14 +136,12 @@ if($rows->length == 0){
 		$signby = $x->query('//*[@id="track-trace-request-form"]/div/div/div[2]/div/div[1]/div/p[1]/span[1]/text()');
 
 		//Gen Signature URL
-		$arr = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => $signby->item(0)->nodeValue) + $arr;
+		$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => $signby->item(0)->nodeValue) + $output;
 	}else{
-		$arr = array('signatureURL' => '') + $arr;
+		$output = array('signatureURL' => '') + $output;
 	}
 
-	$arr = array('trackingNumber' => $trackingNumber, 'response' => '1', 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $arr;
+	$output = array('trackingNumber' => $trackingNumber, 'response' => '1', 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
 }
 //Echo out result
-echo "<pre>";
-print_r($arr);
-echo "</pre>";
+echo json_encode($output, JSON_UNESCAPED_SLASHES);
