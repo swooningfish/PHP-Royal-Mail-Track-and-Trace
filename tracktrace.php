@@ -113,10 +113,7 @@ function TrackTraceQuery($trackingNumber){
 			//Gen Signature URL and printed name
 			if($signby->length != 0){
 				$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => str_replace(" ", '', $signby->item(0)->nodeValue)) + $output;
-			}else{
-				$signature = 0;
-				$signatureID = null;
-			}	
+			}
 		}
 
 		$output = array('trackingNumber' => $trackingNumber, 'response' => 1, 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
