@@ -61,7 +61,7 @@ $rows = $x->query('//*[@id="bt-tracked-track-trace-form"]/div/div/div/div[1]/tab
 if($rows->length == 0){
 	//No data returned
 	$error = $x->query('//*[@id="bt-tracked-track-trace-form"]/div/div/div/div[1]/div[5]/text()');
-	$output = array('trackingNumber' => $trackingNumber, 'response' => '0', 'errorMsg' => $error->item(0)->nodeValue);
+	$output = array('trackingNumber' => $trackingNumber, 'response' => 0, 'errorMsg' => $error->item(0)->nodeValue);
 }else{
 	//Loops to build arrays with records.
 	$i = 0;
@@ -134,14 +134,14 @@ if($rows->length == 0){
 		$dom->loadHTML($signby);
 		$x = new DomXPath($dom);
 		$signby = $x->query('//*[@id="track-trace-request-form"]/div/div/div[2]/div/div[1]/div/p[1]/span[1]/text()');
-
+		
 		//Gen Signature URL
-		$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => $signby->item(0)->nodeValue) + $output;
+		$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => str_replace(" ", '', $signby->item(0)->nodeValue)) + $output;
 	}else{
 		$output = array('signatureURL' => '') + $output;
 	}
 
-	$output = array('trackingNumber' => $trackingNumber, 'response' => '1', 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
+	$output = array('trackingNumber' => $trackingNumber, 'response' => 1, 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
 }
 //Echo out result
 echo json_encode($output, JSON_UNESCAPED_SLASHES);
