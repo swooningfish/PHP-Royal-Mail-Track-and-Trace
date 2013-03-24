@@ -21,7 +21,7 @@ if(isset($_GET['tn'])){
 }elseif(isset($_POST['tn'])){
 	$output = TrackTraceQuery($_POST['tn']);
 }else{
-	$output = array('trackingNumber' => $trackingNumber, 'response' => 0, 'errorMsg' => 'No tracking number provided.');
+	$output = array('trackingNumber' => null, 'response' => 0, 'errorMsg' => 'No tracking number provided.');
 }
 
 //Echo the output
@@ -148,6 +148,6 @@ function TrackTraceQuery($trackingNumber){
 		}
 
 		$output = array('trackingNumber' => $trackingNumber, 'response' => 1, 'delivered' => $delivered, 'deliveredID' => $deliveredID, 'signature' => $signature, 'signatureID' => $signatureID) + $output + array('trackRecords' => $trackRecords);
-		return $output;
 	}
+	return $output;
 }
