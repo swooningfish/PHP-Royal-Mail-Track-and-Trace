@@ -23,9 +23,8 @@ if(isset($_GET['tn'])){
 }else{
 	$output = array('trackingNumber' => null, 'response' => 0, 'errorMsg' => 'No tracking number provided.');
 }
-
 //Echo the output
-echo json_encode($output, JSON_UNESCAPED_SLASHES);
+echo str_replace('\\/', '/', json_encode($output));
 
 function CurlPost($url, $postData){
 	//start cURL
@@ -102,46 +101,14 @@ function TrackTraceQuery($trackingNumber){
 
 		//Adding some extras to the output
 		if($signature == 1){
-			//It's much more awkward to get the printed name
-			//We basically have to simulate user input step by step as you would do it on the website.
-			$tokenHTML = CurlPost('http://www.royalmail.com/track-trace', null);
-			$tokenDOM = new DomDocument();
-			$tokenDOM->loadHTML($tokenHTML);
-			$x = new DomXPath($tokenDOM);
-			$tnt_token = $x->query('//input[@type="hidden" and @name="tnt_time_token" and position() = 1]/@value');
-			$tnt_time_token = $tnt_token->item(0)->value;
-			$form_build = $x->query('//*[@id="track-trace-request-form"]/div/div/div[2]/div/input[@name="form_build_id"]/@value');
-			$form_build_id = $form_build->item(0)->value;
-
-
-			$tokenHTML = CurlPost('http://www.royalmail.com/track-trace', array(
-				'track_id' => $trackingNumber, 
-				'op' => "Track",
-				'tnt_time_token' => $tnt_time_token,
-				'form_build_id' => $form_build_id,
-				'form_id' => "track_trace_request_form"
-			));
-			$tokenDOM = new DomDocument();
-			$tokenDOM->loadHTML($tokenHTML);
-			$x = new DomXPath($tokenDOM);
-			$tnt_token = $x->query('//input[@type="hidden" and @name="tnt_time_token" and position() = 1]/@value');
-			$tnt_time_token = $tnt_token->item(0)->value;
-			$form_build = $x->query('//*[@id="track-trace-request-form"]/div/div/div[2]/div/input[@name="form_build_id"]/@value');
-			$form_build_id = $form_build->item(0)->value;
-
+			//Found a much easier page to scrape the printed name off in one request
 			//Make cURL request for signature details
-			$signby = CurlPost('http://www.royalmail.com/track-trace', array(
-				'track_id' => $trackingNumber, 
-				'op' => "View Proof of Delivery",
-				'tnt_time_token' => $tnt_time_token,
-				'form_build_id' => $form_build_id,
-				'form_id' => "track_trace_request_form"
-			));
+			$signby = CurlPost('http://www.royalmail.com/track-trace/pod-print/'.$trackingNumber.'', null);
 			//Get the name
 			$dom = new DomDocument();
 			$dom->loadHTML($signby);
 			$x = new DomXPath($dom);
-			$signby = $x->query('//*[@id="track-trace-request-form"]/div/div/div[2]/div/div[1]/div/p[1]/span[1]/text()');
+			$signby = $x->query('//*[@id="proof"]/p[1]/span[1]/text()');
 		
 			//Gen Signature URL
 			$output = array('signatureURL' => 'http://www.royalmail.com/track-trace/pod-render/'.$trackingNumber.'', 'printedName' => str_replace(" ", '', $signby->item(0)->nodeValue)) + $output;
