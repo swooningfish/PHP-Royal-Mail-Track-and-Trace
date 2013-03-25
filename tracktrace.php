@@ -16,10 +16,9 @@
 //along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //For a demo you can use FI107380836GB
-if(isset($_GET['tn'])){
-	$output = TrackTraceQuery($trackingNumber = $_GET['tn']);
-}elseif(isset($_POST['tn'])){
-	$output = TrackTraceQuery($_POST['tn']);
+$req = array_merge($_GET, $_POST);
+if(isset($req['tn'])){
+	$output = TrackTraceQuery($req['tn']);
 }else{
 	$output = array('trackingNumber' => null, 'response' => 0, 'errorMsg' => 'No tracking number provided.');
 }
