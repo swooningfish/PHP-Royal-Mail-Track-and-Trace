@@ -81,8 +81,8 @@ function TrackTraceQuery($trackingNumber){
 						break;
 					case 2:
 						$status = $value->nodeValue;
-						if(preg_match('/delivered/i', $status) && !preg_match('/undelivered/i', $status)){$delivered = 1; $deliveredID = $i;}
-						if(preg_match('/signature/i', $status) && !preg_match('/no signature/i', $status)){$signature = 1; $signatureID = $i;}
+						if(preg_match('/^(?!un)delivered/i', $status)){$delivered = 1; $deliveredID = $i;}
+						if(preg_match('/(?!no )signature/i', $status)){$signature = 1; $signatureID = $i;}
 						break;
 					case 3:
 						$trackPoint = $value->nodeValue;
